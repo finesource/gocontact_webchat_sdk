@@ -1,0 +1,671 @@
+textarea{
+    resize: none;
+}
+
+html, body{
+    font-family: Arial;
+    font-size: 14px;
+    overflow: hidden;
+    border-radius: 10px 10px 0 0;
+}
+
+#fs-webchat{
+    border: 1px solid rgba(0,0,2,0.8);
+    border-top: 0;
+    border-radius: 10px 10px 0 0;
+}
+
+#fs-webchat header{
+    height: 40px;
+    padding: 0 20px;
+    box-shadow: inset 0 1px 0 rgba(253,253,255,0.2), 0 1px 1px rgba(0,0,2,0.2);
+    position: relative;
+    cursor: pointer;
+}
+
+#fs-webchat header .status,
+#fs-webchat header .title{
+    line-height: 40px;
+}
+
+#fs-webchat header .close{
+    line-height: 40px;
+    color: #FFF !important;
+    font-size: medium !important;
+    opacity: 1 !important;
+    text-shadow: 0 1px 0 rgba(0,0,2,0.3);
+}
+
+#fs-webchat header .close i{
+    vertical-align: middle;
+}
+
+#fs-webchat header .title{
+    color: #FFFFFF;
+    padding-left: 10px;
+    transition: color ease 0.20s;
+    display: none;
+}
+
+#fs-webchat.online header .title[data-when="online"],
+#fs-webchat.offline header .title[data-when="offline"]{
+    display: inline;
+}
+
+#fs-webchat.online header .status{
+    color: lightgreen;
+}
+
+#fs-webchat.offline header .status{
+    color: #FF3333;
+}
+
+#fs-webchat.neutral header .status {
+    color: #FFFFFF;
+}
+
+#fs-webchat header .fa-chevron-down,
+#fs-webchat.closed header .fa-chevron-up{
+    display: inline-block !important;
+}
+
+
+#fs-webchat header .fa-chevron-up,
+#fs-webchat.closed header .fa-chevron-down{
+    display: none !important;
+}
+
+#fs-webchat header .close.disabled{
+    pointer-events: none;
+    opacity: 0.1;
+}
+
+
+#fs-webchat header .badge{
+    background-color: red;
+    position: absolute;
+    right: 20px;
+    top: 10px;
+}
+
+#fs-webchat footer{
+    height: 40px;
+    text-align: center;
+    font-size: 12px;
+}
+
+#fs-webchat footer span{
+    line-height: 40px;
+}
+
+#fs-webchat .main-dialog{
+    height: 370px;
+    overflow: hidden;
+}
+
+#fs-webchat .main-dialog > div{
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    padding: 0;
+    transition: all ease 0.20s;
+    position: relative;
+}
+
+#fs-webchat .main-dialog > div.active{
+    height: 100%;
+    opacity: 1;
+    z-index: 100;
+}
+
+#fs-webchat .main-dialog .user-data-box.active{
+    padding: 10px 15px;
+}
+
+#fs-webchat .main-dialog .user-data-box .well{
+    text-align: center;
+}
+
+#fs-webchat .main-dialog .user-data-box .btns{
+    padding-top: 20px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .options-box{
+    height: 50px;
+    border-top: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+}
+
+#fs-webchat.loading .main-dialog .chat-dialog-box .options-box{
+    display: none;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .options-box ul{
+    list-style: none;
+    margin: 0;
+    padding: 0 10px;
+    line-height: 50px;
+    width: 100%;
+    height: 100%;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .options-box ul li{
+    float: right;
+    padding: 0 10px;
+    cursor: pointer;
+    height: 100%;
+    transition: background-color ease 0.2s;
+    position: relative;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .options-box ul li:hover{
+    background-color: #FFFFFF;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .options-box ul li.disabled{
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box{
+    height: 250px;
+}
+/*****************************************************************************/
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box .encryptedmsg_master{
+    position: relative;
+    cursor: pointer;
+}
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box .encryptedmsg_master i{
+    color: #CDCDCD;
+    position: absolute;
+    right: 5px;
+    top: 8px;
+}
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box .encryptedmsg_master:hover i{
+    display: none;
+}
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box .encryptedmsg_master .encryptedmsg{
+    border: 1px solid #DDD;
+    padding: 0 5px 0 5px;
+    border-radius: 7px;
+    margin: 0 5px 0 5px;
+}
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box .encryptedmsg_master:hover .encryptedmsg{
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+/*****************************************************************************/
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul{
+    list-style: none;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    padding: 5px 10px;
+    word-wrap: break-word;
+    overflow: auto;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box .loading-info{
+    display: none;
+    text-align: center;
+    margin-top: 130px;
+    overflow: hidden;
+}
+
+#fs-webchat.loading .main-dialog .chat-dialog-box .dialog-box .loading-info{
+    display: block;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .message-box{
+    height: 60px;
+    padding: 5px 10px;
+}
+
+#fs-webchat.loading .main-dialog .chat-dialog-box .message-box{
+    display: none;
+}
+
+#fs-webchat.loading .main-dialog .chat-dialog-box .dialog-box ul{
+    visibility: hidden;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box .bubble-text {
+    white-space: pre-line;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box,
+#fs-webchat .main-dialog .chat-dialog-box .error-message{
+    width: 100%;
+    opacity: 0;
+    position: absolute;
+    top: 50px;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: 3px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.5);
+    z-index: 500;
+    visibility: hidden;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box.active,
+#fs-webchat .main-dialog .chat-dialog-box .error-message.active{
+    opacity: 1;
+    visibility: visible;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .error-message p{
+    line-height: 50px;
+    text-align: center;
+    font-size: 15px;
+    margin: 0;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box.list-options-box-active::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 52px;
+    right: 22px;
+    box-sizing: border-box;
+    border: 9px solid black;
+    border-color: #FFF #FFF transparent transparent;
+    transform-origin: 0 0;
+    transform: rotate(-45deg);
+    box-shadow: 2px -2px 2px 0 rgba(0, 0, 0, 0.15);
+    z-index: 999;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul{
+    list-style: none;
+    padding: 5px 0;
+    margin: 0;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.op{
+    padding: 5px 20px 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    position: relative;
+    clear: both;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.op.no-select{
+    cursor: default;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.divider{
+    height: 2px;
+    background-color: #EEE;
+    margin: 5px 0;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.op:not(.no-select):hover{
+    background-color: #EEE;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.disabled{
+    pointer-events: none;
+    background-color: lightgray;
+    opacity: 0.5;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.op label{
+    float: right;
+    height: 20px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.op label input{
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.op label select{
+    height: 20px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 12px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .list-options-box ul li.op > i{
+    margin-right: 10px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .rating-box,
+#fs-webchat .main-dialog .chat-dialog-box .end-actions-box,
+#fs-webchat .main-dialog .chat-dialog-box .time-expire-box,
+#fs-webchat .main-dialog .chat-dialog-box .time-expire-autoclose-box,
+#fs-webchat .main-dialog .chat-dialog-box .change-name-box{
+    width: 100%;
+    height: 0;
+    opacity: 0;
+    transition: height ease 0.2s, opacity ease 0.2s;
+    position: absolute;
+    top: 50px;
+    overflow: hidden;
+    background-color: #EEE;
+    padding: 0 15px;
+    text-align: center;
+    z-index: 200;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .rating-box.active,
+#fs-webchat .main-dialog .chat-dialog-box .end-actions-box.active,
+#fs-webchat .main-dialog .chat-dialog-box .time-expire-box.active,
+#fs-webchat .main-dialog .chat-dialog-box .time-expire-autoclose-box.active,
+#fs-webchat .main-dialog .chat-dialog-box .change-name-box.active{
+    height: 320px;
+    opacity: 1;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .rating-box > div,
+#fs-webchat .main-dialog .chat-dialog-box .end-actions-box > div,
+#fs-webchat .main-dialog .chat-dialog-box .time-expire-box > div,
+#fs-webchat .main-dialog .chat-dialog-box .time-expire-autoclose-box > div,
+#fs-webchat .main-dialog .chat-dialog-box .change-name-box > div{
+    margin-top: 20px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .rating-box .stars-box span{
+    cursor: pointer;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .rating-box .stars-box span.active{
+    color: #FF9900;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .rating-box .btns button,
+#fs-webchat .main-dialog .chat-dialog-box .end-actions-box .btns button,
+#fs-webchat .main-dialog .chat-dialog-box .time-expire-box .btns button,
+#fs-webchat .main-dialog .chat-dialog-box .time-expire-autoclose-box .btns button,
+#fs-webchat .main-dialog .chat-dialog-box .change-name-box .btns button{
+    width: 100px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .change-name-box .form-horizontal .control-label{
+    text-align: right;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .change-name-box #change-name-current{
+    text-align: left;
+}
+
+#fs-webchat .main-offline{
+    display: none;
+}
+
+#fs-webchat.offline.show-off-form .main-offline{
+    height: 370px;
+    overflow: hidden;
+    display: block;
+}
+
+#fs-webchat.offline.show-off-form .main-dialog{
+    display: none;
+}
+
+#fs-webchat .main-offline .well{
+    text-align: center;
+}
+
+#fs-webchat.opened.offline .main-offline{
+    padding: 10px 15px;
+}
+
+#fs-webchat.online .main-offline{
+    display: none;
+}
+
+#fs-webchat .main-offline .btns{
+    padding-top: 20px;
+}
+
+/*EPISODIOS*/
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li{
+    margin: 10px 0;
+    font-size: 15px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li .intro{
+    line-height: 30px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li .intro img{
+    width: 30px;
+    height: 30px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li .name{
+    padding-left: 10px;
+    font-weight: bold;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li .date{
+    font-size: 12px;
+    color: gray;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-from='AGENT'] .name{
+    color: #FF3300;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='JOIN'],
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='LEAVE']{
+    text-align: center;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='JOIN'] > div > div:nth-child(2),
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='LEAVE'] > div > div:nth-child(2){
+    font-style: italic;
+    padding-bottom: 2px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='REQUESTRATING'] > div > div:nth-child(3){
+    text-align: center;
+    padding: 5px 0;
+    margin-top: 5px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='FILESEND'] > div > div:nth-child(3){
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='FILESEND'] > div > div:nth-child(3) .download{
+    cursor: pointer;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='MSG'] > div > div:nth-child(2),
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='RATING'] > div > div:nth-child(2),
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='COMMENT'] > div > div:nth-child(2),
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='REQUESTRATING'] > div > div:nth-child(2),
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul li[data-type='FILESEND'] > div > div:nth-child(2){
+    padding-left: 40px;
+}
+
+#fs-webchat .sysclearfix:after{
+    clear: both;
+    content: ".";
+    display: block;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    visibility: hidden;
+}
+
+/******************************************************************************
+ * User images
+ ******************************************************************************/
+
+#fs-webchat .dialog-box ul li img{
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+}
+
+#fs-webchat .user_img:before{
+    background-size: 100%;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+    content: "";
+    top: 10px;
+    position: relative;
+}
+
+/******************************************************************************
+ * Private MSGs
+ ******************************************************************************/
+
+#fs-webchat li[data-from="SYSTEM"].private .user_img:before,
+#fs-webchat li[data-from="AGENT"].private .user_img:before{
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAqCAYAAADMKGkhAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wkXCTczz2TzoAAABERJREFUWMPtmG1MW2UUx/+3t4WuNNLLinthAwbaQnQZpGPKGkCHi0u2ZEoyjdMs4IjdNLKoW7KMMd5kYTqzmEwRy9z0ywxLIZpFSRaGowt1ClnGvvBiScA6oMItb6299N4+fpAsIeNlvbfesmQnuUnTnnOfX/85zznneVB30UbwiNmjyPzYHtuKsLIv20h53Y3/dQNR4XpRldXBeqdZRq/TwJiaAJ4X0DdwD+7xSdC0EmqNFtXv7aBWDHiV1cF6J93Ms8ZEy/7dW+oX8/v5phPdPYPgglGoPJRLRTQlKurtpLahlQjB4EM/Dbbfasvr2knEFK9ucLAq4mOOHXwx5NjPv7PDy0d3lRU/v1Xs+gqxgdMTblHQAHDkQA4m2WGTFMUVYtV+xrAxVcrCKRvX4PSlrhRZwWemPMxbezKcUsC3ZT8F7zTrlBWcBAOSN3Zmoh5+34y8qRIMhqe3REep5AUHpQgLuFKpkBc8KioaPkGQDD4b4OUFV0WvQssvfZLBeQn/XRR45aFcasTtkQTd3NqDGK1OXvDjn/1IMjI2SQJ/NT8NSvjlBU9YG4ft6eskp4oxZT0q6u1EvqqyAmZTUeB/s1Nh4fb7Z3cqaKWozaIUEyRAhdtDY8hM1C/r63a74ejogMvlAgCo1WoYjEaYzWawEzPXThWLm81Fgde8v5OKjWkjmYV5S/p5WBZXGhv/K6EqFSiKQiAQQPedO/ijvx8udrX45iU20MvRKD13FTUf7Fnw90AgAJvNBgDIz8/H0wYDaJqGz+fD5cYf4JsZh14bJ3PLB1B5OJeiVaswNOldWG2PBxzHISk5GWnp6aBpGgCg0WhA1GvrAUDDu0ZlBweAmCfiUn9qubtwO5+dBQDE6x/cB3+6/7HMfVwTEfAThaaBgaHRZeax+UtcvdEPRZRWckWSXMd1+nVd575tn191BAGBOcV5ngfHcfefzu5e6PluyeuG5ZqgvK6dGJNiu17ftdkkCAKam5owOhpS+h4rKSk5K3vnrDycS93tHzH5BAE8z4cKDQCfRqzlBwUBmrnKIYcpwpUqhuR4y1I+uXl5GOY3gYDyRxy85uLv7xz9pJmkJes8ha+Y6pfydblcKLXsAEDUYTn2iQ08eb6V0PwUzhzdCwDMcv4DTieysrLCdssaEvjpS50vTU+MX9NpVdicnoSXs0M7TAwNDso7EVdf+LVzYmzYlLwhHu++sX1JX47j0GC1hn7+jN2Cv0ZYMPr1V04efO41SYp/fOFWo2fs3j69lnhOFO19OCWo0JOBYRjsfzMHAFD3vWPfh7VNZPWTG86Uvr3teMiKl31xnTAxNI4cyAkZpLe3FzftdgSDwWV9Y3U6FBQUQKmcr+HZb9rg41WL3qU/8GWVtYP4Z8Zh3pqGXeZURNKar/fg1u0+6PQJltKirK8XBa/4yk40qgA+KnoBK8kqz7dAqWE8p4qz7w/w/wJAZrITje0YawAAAABJRU5ErkJggg==)  0/30px 30px no-repeat;
+}
+
+#fs-webchat li[data-type="MSG"].private .intro .name,
+#fs-webchat li[data-type="MSG"].private > div > div:nth-child(2) span{
+    color: #296191;
+    font-weight: bold;
+}
+
+/**************************************************************************/
+/* SmallBox Responsive */
+/**************************************************************************/
+
+#divbigBoxes #newTitlediv *{
+    font-weight: bold;
+}
+
+#divbigBoxes #newTitlediv .botClose{
+    cursor: pointer;
+    padding-right: 10px;
+    float: right;
+}
+
+#newContentdiv p >i:first-child{
+    padding-right: 10px;
+}
+
+#divSmallBoxes{
+    position: fixed;
+    width: 90%;
+    right: 0;
+    top: 0;
+}
+
+.SmallBox{
+    width: 95%;
+}
+
+.SmallBox:hover{
+    box-shadow: 0px 0px 10px #888888;
+    cursor: pointer;
+}
+
+.SmallBox span{
+    font-size: 16px;
+}
+.SmallBox p{
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.SmallBox .textoFull{
+    width: 93%;
+    float: left;
+    padding-left: 20px;
+}
+
+.SmallBox .textoFoto{
+    width: 55%;
+    margin: 3px 20px 3px 80px;
+    float: left;
+}
+
+/* End of SmallBox Responsive*/
+
+/* bigBoxes Responsive */
+
+.bigBox{
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    background-color: #004d60;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    width: 88%;
+    height: 100px;
+    color: white;
+    z-index: 99999;
+}
+
+/* End of  bigBoxes  Responsive */
+
+/*Messagebox Responsive */
+
+.divMessageBox{
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 100000;
+}
+
+.MessageBoxContainer{
+    top: 25%;
+    color: white;
+    position: relative;
+    width: 100%;
+    background-color: #232323;
+}
+
+.MessageBoxMiddle{
+    position: relative;
+    left: 0;
+    width: 100%;
+    padding: 3px;
+}
+
+.MessageBoxMiddle .MsgTitle{
+    font-size: 22px;
+}
+
+.MessageBoxMiddle .pText{
+    font-size: 13px;
+}
+
+.MessageBoxContainer input{
+    width: 50%;
+    padding: 5px;
+}
+
+.MessageBoxContainer select{
+    width: 50%;
+    padding: 5px;
+}
+
+.MessageBoxButtonSection{
+    width: 100%;
+    height: 30px;
+}
+
+.MessageBoxButtonSection button{
+    float: right;
+    margin-right: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* End of Messagebox Responsive */

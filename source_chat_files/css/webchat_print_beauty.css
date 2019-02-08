@@ -1,0 +1,27 @@
+#fs-webchat .main-dialog .chat-dialog-box{
+    overflow-y: auto;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box{
+    height: auto !important;
+    position: relative !important;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box ul{
+    height: auto !important;
+}
+
+#fs-webchat .main-dialog .chat-dialog-box .dialog-box > ul{
+    height: 100%;
+}
+
+#fs-webchat{
+    border: none;
+    border-radius: 0;
+}
+
+#fs-webchat .dialog-box ul li img{
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+}
