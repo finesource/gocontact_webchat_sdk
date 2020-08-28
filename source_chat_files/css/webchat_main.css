@@ -264,6 +264,10 @@ html, body{
     margin: 0;
 }
 
+#error-message-offline.error {
+    color: #a90329;
+}
+
 #fs-webchat .main-dialog .chat-dialog-box.list-options-box-active::after {
     content: "";
     position: absolute;
@@ -669,3 +673,10 @@ html, body{
 }
 
 /* End of Messagebox Responsive */
+
+
+footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

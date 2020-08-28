@@ -28,6 +28,21 @@ FSWebChatIn.fnShowBigAlert = function (type, title, message, icon, timeout, hide
         type: type, title: title, timeout: timeout, body: message, icon: icon
     });
 };
+
+/**
+ * This method shows an error message (on the top of the webchat window) when the client tries to start a conversation
+ * and the webchat is out of schedule.
+ *
+ * @param {string} msg is the error message shown when the webchat is out of schedule
+ *                 msg - "Webchat is out of schedule"
+ */
+FSWebChatIn.showErrorMsg = function (msg) {
+
+    $('#error-message-offline').html(msg);
+    $('#error-message-offline').addClass('error');
+
+}
+
 FSWebChatIn.inIframe = function () {
     try {
         return window.self !== window.top;
@@ -75,7 +90,7 @@ FSWebChatIn.storeBrowserPath = function (obj) {
 FSWebChatIn.setActiveData = function () {
     return $.ajax({
         type: 'POST',
-        url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/update-state',
+        url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/update-state',
         data: {
             sparkId: FSWebChatIn.sparkId
         }
@@ -84,9 +99,13 @@ FSWebChatIn.setActiveData = function () {
 FSWebChatIn.SetStatusVarWCView = function (obj) {
     FSWebChatIn._statusvarofwcview = obj.status || false;
 };
+FSWebChatIn.sendWebChatDialogStatus = function (status){
+    var _msg = {action:"WebChatDialogStatus", status: status || ''};
+    parent.postMessage(_msg, FSWebChatIn._options.origin);
+};
 FSWebChatIn.GetStatusVarWCView = function (){
     var _msg = {action:"GetStatusVarWCView"};
-    parent.postMessage(_msg,FSWebChatIn._options.origin);
+    parent.postMessage(_msg, FSWebChatIn._options.origin);
 };
 FSWebChatIn.ResetStatusVarWCView = function (){
     var _msg = {action:"ResetStatusVarWCView"};
@@ -123,7 +142,6 @@ FSWebChatIn.StopMirroring = function (){
     parent.postMessage(_msg,FSWebChatIn._options.origin);
 };
 
-
 FSWebChatIn.ShowHideElement = function (_id,_display){
     var _msg = {action:"ShowHideElement",elem:_id||'',display:_display||''};
     parent.postMessage(_msg,FSWebChatIn._options.origin);
@@ -137,6 +155,18 @@ FSWebChatIn.GetClientBrowserURL = function (){
     parent.postMessage({action: 'GetClientBrowserURL'}, FSWebChatIn._options.origin);
 };
 
+FSWebChatIn.isWebchatDialogInit = function(){
+    var local_hashkey = FSWebChatIn.storage.get('webchat_init');
+    if(local_hashkey && local_hashkey.length > 0) {
+        //look for "sha1 key"
+        var _pattern = /^[0-9a-f]{40}$/i;
+        var _result = _pattern.test(local_hashkey);
+        if (_result === true) {
+            FSWebChatIn._options._hashkey = local_hashkey;
+        }
+    }
+};
+
 
 function FSWebChatInhandleResponse(e) {
     if (e.data.action === 'setOrigin') {
@@ -144,8 +174,12 @@ function FSWebChatInhandleResponse(e) {
         if (Object.keys(e.data.params).length) {
             FSWebChatIn.extendObject(FSWebChatIn._options, e.data.params)
         }
-        FSWebChatIn.init();
+        FSWebChatIn._options.service = FSWebChatIn._options._server + (FSWebChatIn._options._service || '');
+        FSWebChatIn._options._wss = FSWebChatIn._options._wss || '/webchat-wss';
+
         FSWebChatIn.storage = new Storage();
+        FSWebChatIn.isWebchatDialogInit();
+        FSWebChatIn.init();
         FSWebChatIn.GetStatusVarWCView();
     } else if (e.data.action === 'sendBrowserPath') {
         FSWebChatIn.storeBrowserPath(e.data.params);
@@ -211,11 +245,25 @@ $(document).ready(function () {
  * @returns {unresolved}
  */
 FSWebChatIn.init = function () {
-    return $.getJSON(FSWebChatIn._options._server + '/webchats/configs/' + FSWebChatIn._options._hashkey).done(function (data) {
+    return $.getJSON(FSWebChatIn._options.service + '/webchats/configs/' + FSWebChatIn._options._hashkey).done(function (data) {
         for (var _set in data.data) {
             if (data.data[_set] === 'true' || data.data[_set] === 'false') {
                 data.data[_set] = data.data[_set] === 'true';
             }
+        }
+
+        if(data.data.campaignUrl) {
+            document.getElementById("campaignUrl").href = data.data.campaignUrl; 
+        }
+
+        FSWebChatIn.domain = data.data.domain;
+        FSWebChatIn.geolocation = data.data.allowGeolocation;
+
+        FSWebChatIn.validation = data.validation || null;
+
+        if(FSWebChatIn.storage.get('uuid') === null && FSWebChatIn.validation !== FSWebChatIn.storage.get('validation')){
+            FSWebChatIn.storage.clear();
+            FSWebChatIn.storage.add('validation', FSWebChatIn.validation);
         }
 
         FSWebChatIn.loginFields = data.data.loginFields;
@@ -223,6 +271,7 @@ FSWebChatIn.init = function () {
 
         FSWebChatIn._timestamp = +new Date();
         FSWebChatIn.Chat = new Chat(null, data.data);
+
     });
 };
 
@@ -251,7 +300,7 @@ FSWebChatIn.renderLoginScreen = function(loginFields) {
  * @returns {boolean}
  */
 FSWebChatIn.initSocket = function () {
-    FSWebChatIn.socketController = new WebChatClienteController({hashkey: FSWebChatIn._options._hashkey, url: FSWebChatIn._options._server});
+    FSWebChatIn.socketController = new WebChatClienteController({hashkey: FSWebChatIn._options._hashkey, url: FSWebChatIn._options._server, wss: FSWebChatIn._options._wss});
 
     return FSWebChatIn.socketController.init().then(function (data) {
         FSWebChatIn.sparkId = data.sparkId;
@@ -342,7 +391,7 @@ FSWebChatIn.resetInterface = function () {
 FSWebChatIn.confirmMsgReading = function (dialogGroupUuid, dialogUuid) {
     return $.ajax({
         type: 'POST',
-        url: FSWebChatIn._options._server + '/dialogs/' + dialogGroupUuid + '/mark-as-read',
+        url: FSWebChatIn._options.service + '/dialogs/' + dialogGroupUuid + '/mark-as-read',
         data: {
             dialogUuid: dialogUuid
         }
@@ -362,7 +411,7 @@ FSWebChatIn.reconnectedWebChatEvent = function (callback) {
 
     return $.ajax({
         type: 'POST',
-        url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/resume-session',
+        url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/resume-session',
         data: {
             sparkId: FSWebChatIn.sparkId
         }
@@ -426,7 +475,7 @@ FSWebChatIn.sendBrowserInfo = function(){
 
     return $.ajax({
         type: 'POST',
-        url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/browser-info',
+        url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/browser-info',
         data: {
             browserInfo: browserInfo
         }
@@ -438,68 +487,49 @@ FSWebChatIn.requestBrowserLocation = function(){
 };
 
 FSWebChatIn.sendBrowserLocation = function(browser_data){
+
+        if (FSWebChatIn.geolocation === false) {
+            return;
+        }
+
     var data = {};
 
     function sendLocation() {
         return $.ajax({
             type: 'POST',
-            url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/client-location',
+            url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/client-location',
             data: {
                 clientLocation: data
             }
         });
     }
 
-    function getValue(values, key, name) {
-        for (var i = 0, len = values.length; i < len; i++) {
-            var value = values[i];
-            if (value.types.indexOf(key) > -1) {
-                return value[name];
+    if (browser_data) {
+        $.getJSON('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + browser_data.latitude + '&lon=' + browser_data.longitude, function(response) {
+            data = {
+                ip: '',
+                address: response.display_name,
+                country_code: response.address.country_code,
+                country_name: response.address.country,
+                region_name: response.address.state_district,
+                city: response.address.town,
+                zip_code: response.address.postcode,
+                latitude: browser_data.latitude,
+                longitude: browser_data.longitude,
+                metro_code: 0
             }
-        }
-        return '';
-    }
 
-    $.getJSON('https://freegeoip.net/json/', function(response) {
-        data = {
-            ip: response.ip,
-            address: '',
-            country_code: response.country_code,
-            country_name: response.country_name,
-            region_code: response.region_code,
-            region_name: response.region_name,
-            city: response.city,
-            zip_code: response.zip_code,
-            time_zone: response.time_zone,
-            latitude: response.latitude,
-            longitude: response.longitude,
-            metro_code: 0
-        };
-
-        if (browser_data) {
-            $.ajax({
-                url: 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + browser_data.latitude + ',' + browser_data.longitude,
-                error: function (error) {
-                    sendLocation();
-                },
-                success: function (response) {
-                    if (response.status === 'OK') {
-                        var results = response.results[0], address = results.address_components;
-                        data = $.extend(data, {
-                            address: results.formatted_address,
-                            city: getValue(address, 'locality', 'long_name'),
-                            zip_code: getValue(address, 'postal_code', 'long_name'),
-                            latitude: browser_data.latitude,
-                            longitude: browser_data.longitude
-                        });
-                    }
-                    sendLocation();
-                }
+            $.getJSON('https://api.ipify.org?format=json', function (ipResponse) {
+                data.ip = ipResponse.ip;
+                sendLocation()
+            }).fail(function (error) {
+                sendLocation()
+                throw error;
             });
-        } else {
-            sendLocation();
-        }
-    });
+        }).fail(function (error) {
+            console.error(error);
+        });
+    }
 };
 
 FSWebChatIn.sendBrowserVisitorPath = function () {
@@ -511,7 +541,7 @@ FSWebChatIn.sendBrowserVisitorPath = function () {
 
     return $.ajax({
         type: 'POST',
-        url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/visitor-path',
+        url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/visitor-path',
         data: {
             visitorPath: JSON.parse(_path)
         }
@@ -627,10 +657,10 @@ Chat.POSITION = Object.freeze({
     "TOP-LEFT": { "vertical": "top", "horizontal": "left"}
 });
 
-Chat.prototype.Render = function () {  
-    this.applyConfigs();
-    this.applyEvents();
-    this.checkChatState();
+Chat.prototype.Render = function (isChatOnline) {  
+    this.applyConfigs(isChatOnline);
+    this.applyEvents(isChatOnline);
+    this.checkChatState(isChatOnline);
 
     var lang = FSWebChatIn.storage.get('lang') || this.configs.default_lang || 'en';
     this.loadLanguagesSelect(lang);
@@ -639,9 +669,9 @@ Chat.prototype.Render = function () {
 Chat.prototype.isOnline = function () {
     var that = this;
 
-    return $.getJSON(FSWebChatIn._options._server + '/webchats/schedule/' + FSWebChatIn._options._hashkey).done(function (data) {
+    return $.getJSON(FSWebChatIn._options.service + '/webchats/schedule/' + FSWebChatIn._options._hashkey).done(function (data) {
         that.online = data.online;
-        that.Render();
+        that.Render(data.online);
     });
 };
 
@@ -669,7 +699,10 @@ Chat.prototype.updateWebchatStatus = function (is_online, connection_lost) {
     }
 };
 
-Chat.prototype.applyConfigs = function () {
+Chat.prototype.applyConfigs = function (isChatOnline) {
+    if (!isChatOnline && !this.configs.show_chat_offline) {
+        return;
+    }
     var $webchat = $('#fs-webchat');
     var position = Chat.POSITION[this.configs.position].horizontal;
 
@@ -713,7 +746,10 @@ Chat.prototype.applyConfigs = function () {
     }
 };
 
-Chat.prototype.applyEvents = function () {
+Chat.prototype.applyEvents = function (isChatOnline) {
+    if (!isChatOnline && !this.configs.show_chat_offline) {
+        return;
+    }
     var $webchat = $("#fs-webchat");
     $webchat.find('header').on('click', function (e) {
         e.stopPropagation();
@@ -790,7 +826,10 @@ Chat.prototype.applyEvents = function () {
  * 
  * @returns {promise}
  */
-Chat.prototype.checkChatState = function () {
+Chat.prototype.checkChatState = function (isChatOnline) {
+    if (!isChatOnline && !this.configs.show_chat_offline) {
+        return;
+    }
     FSWebChatIn.chatUuid = FSWebChatIn.storage.get('uuid');
     FSWebChatIn.chatId = FSWebChatIn.storage.get('chat_id');
     FSWebChatIn.isMirroring = JSON.parse(FSWebChatIn.storage.get('isMirroring')) || false;
@@ -798,7 +837,7 @@ Chat.prototype.checkChatState = function () {
     var that = this;
     var chat_dialog = JSON.parse(FSWebChatIn.storage.get('dialog'));
 
-    if (FSWebChatIn.chatUuid && chat_dialog) {
+    if (FSWebChatIn.chatUuid && chat_dialog && isChatOnline) {
 
         FSWebChatIn.loading = true;
 
@@ -859,7 +898,7 @@ Chat.prototype.changeChatVisibility = function (display) {
 Chat.prototype.onUserDataSubmit = function (e) {
     var that = this;
 
-    if ($(e.target).hasClass('disabled') || FSWebChatIn.chatUuid) {
+    if ($(e.target).hasClass('disabled')) {
         return;
     }
 
@@ -962,7 +1001,7 @@ Chat.prototype.submitOfflineMessage = function (data) {
     var that = this;
     var body = {hashkey: FSWebChatIn._options._hashkey, contact_email: data.email, contact_name: data.name, message: data.message};
 
-    return $.post(FSWebChatIn._options._server + '/dialogs/offline-message', body).done(function (result) {
+    return $.post(FSWebChatIn._options.service + '/dialogs/offline-message', body).done(function (result) {
         var str_obj = that.getLangObj().main;
 
         if (result.error || (result.data !== undefined && result.data.id === undefined)) {
@@ -983,7 +1022,7 @@ Chat.prototype.initDialog = function (data) {
 
     return $.ajax({
         type: 'POST',
-        url: FSWebChatIn._options._server + '/dialogs/new-dialog-group',
+        url: FSWebChatIn._options.service + '/dialogs/new-dialog-group',
         data: {
             sparkId: FSWebChatIn.sparkId,
             originPath: FSWebChatIn._options.originPath,
@@ -992,9 +1031,14 @@ Chat.prototype.initDialog = function (data) {
     }).then(function (result) {
         FSWebChatIn.chatUuid = result.dialogGroupUuid;
         FSWebChatIn.chatId = result.dialogGroupId;
-        FSWebChatIn.requestBrowserLocation();
+        if (FSWebChatIn.geolocation) {
+            FSWebChatIn.requestBrowserLocation();
+        }
         FSWebChatIn.sendBrowserInfo();
         FSWebChatIn.sendBrowserVisitorPath();
+
+        FSWebChatIn.storage.add('webchat_init', FSWebChatIn._options._hashkey);
+        FSWebChatIn.sendWebChatDialogStatus(FSWebChatIn.chatUuid);
 
         that.setChatID();
         that.startDialog(data);
@@ -1002,7 +1046,7 @@ Chat.prototype.initDialog = function (data) {
         if (error.responseJSON.message === 'WEBCHAT_STATUS_OFFLINE') {
             var lang = that.getLangObj().main;
 
-            FSWebChatIn.fnShowBigAlert('invalid', lang.status_offline_title, lang.status_offline_msg, null);
+            FSWebChatIn.showErrorMsg(lang.status_offline_msg);
             FSWebChatIn.resetInterface();
         }
     });
@@ -1046,7 +1090,7 @@ Chat.prototype.sendEmail = function () {
 
     return $.ajax({
         type: 'POST',
-        url: FSWebChatIn._options._server + '/dialogs/' + dialogGroupUuid + '/request-email',
+        url: FSWebChatIn._options.service + '/dialogs/' + dialogGroupUuid + '/request-email',
         data: {
             language: language
         }
@@ -1142,7 +1186,8 @@ Chat.prototype.uploadCurrentFile = function (episode) {
     formData.append('dialog_uuid', episode.uuid);
 
     return $.ajax({
-        type: "POST", url: FSWebChatIn._options._server + '/upload',
+        type: "POST",
+        url: FSWebChatIn._options.service + '/upload',
         data: formData, cache: false, contentType: false, processData: false
     });
 };
@@ -1262,7 +1307,7 @@ Chat.prototype.onTimeExpire = function (expire_data, expire_delay) {
 
         $.ajax({
             type: 'POST',
-            url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/reregister-client'
+            url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/reregister-client'
         }).then(function (result) {
             FSWebChatIn.Chat.dialog.getNewDialogsFromServer();
         });
@@ -1340,7 +1385,7 @@ Chat.prototype.clientUnRegister = function (type) {
     if (type && type !== 'SetStatusVarWCInactivity') {
         $.ajax({
             type: 'POST',
-            url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/client-unregister',
+            url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/client-unregister',
             data: {
                 closeType: type
             }
@@ -1351,7 +1396,8 @@ Chat.prototype.clientUnRegister = function (type) {
         FSWebChatIn.SetStatusVarWCInactivity();
     }
 
-    FSWebChatIn.storage.remove('dialog', 'uuid', 'chat_id', 'lastpathtime', 'lasturl', 'path', 'isMirroring', 'on-expire');
+    FSWebChatIn.storage.remove('validation','webchat_init','dialog', 'uuid', 'chat_id', 'lastpathtime', 'lasturl', 'path', 'isMirroring', 'on-expire');
+    FSWebChatIn.sendWebChatDialogStatus('');
     $('.loginfields-group input, #on-message, #off-name, #off-email, #off-message').val('');
 
     FSWebChatIn.ResetStatusVarWCView();
@@ -1439,7 +1485,7 @@ Chat.prototype.getLangObj = function () {
 Chat.prototype.notifyLanguageChange = function (dialogGroupUuid, newLanguage) {
     return $.ajax({
         type: 'PUT',
-        url: FSWebChatIn._options._server + '/dialogs/' + dialogGroupUuid + '/language-change',
+        url: FSWebChatIn._options.service + '/dialogs/' + dialogGroupUuid + '/language-change',
         data: {
             newLanguage: newLanguage
         }
@@ -1726,7 +1772,7 @@ Dialog.prototype.sendEpisodeServer = function (episode) {
 
     return $.ajax({
         type: 'POST',
-        url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/client-message',
+        url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/client-message',
         data: {
             episodeObj: episode
         }
@@ -1780,7 +1826,7 @@ Dialog.prototype.getNewDialogsFromServer = function () {
 
     return $.ajax({
         type: 'GET',
-        url: FSWebChatIn._options._server + '/dialogs/' + FSWebChatIn.chatUuid + '/new-client-messages'
+        url: FSWebChatIn._options.service + '/dialogs/' + FSWebChatIn.chatUuid + '/new-client-messages'
     }).then(function (result) {
         if (result.error) {
             return;
@@ -1811,7 +1857,7 @@ Dialog.prototype.setNewName = function (dialogGroupUuid, newName) {
 
     return $.ajax({
         type: 'PUT',
-        url: FSWebChatIn._options._server + '/contacts/update-name',
+        url: FSWebChatIn._options.service + '/contacts/update-name',
         data: {
             dialogGroupUuid: dialogGroupUuid,
             newName: newName

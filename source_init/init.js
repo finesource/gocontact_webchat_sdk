@@ -15,7 +15,13 @@
     div.style.display = 'none';
     FSWebChat._maincontainer = div;
 
-    if (FSWebChat['_' + btoa(location.hostname).replace(/=/g, '')]) {
+    var host_path_browser = location.hostname + location.pathname;
+    var host_path_wchat = location.hostname + (FSWebChat._subfolder || '');
+    var isInMatchingPag = host_path_browser.indexOf(host_path_wchat) === 0;
+    var domain_hash = '_' + btoa(host_path_wchat).replace(/=/g, '');
+    var webchatdialogstatus = localStorage.getItem("_webchatdialogstatus") || '' !== '';
+    
+    if ((isInMatchingPag && FSWebChat[domain_hash]) || webchatdialogstatus) {
         var iframe = document.createElement('iframe');
         iframe.id = FSWebChat._ifid;
 
@@ -121,6 +127,8 @@
                     FSWebChat.sendGeolocation(null);
                 }, geolocationOptions);
             }
+        } else if (e.data.action === 'WebChatDialogStatus') {
+            localStorage.setItem("_webchatdialogstatus", e.data.status);
         } else {
             console.error("Unknown message: ", e.data);
         }
@@ -138,7 +146,10 @@
             "action": 'setOrigin',
             "params": {
                 "_hashkey": FSWebChat._hashkey,
+                "_subfolder": (FSWebChat._subfolder || ''),
                 "_server": FSWebChat._server,
+                "_wss": FSWebChat._wss,
+                "_service": FSWebChat._service,
                 "_timestamp": FSWebChat._timestamp,
                 "originPath": location.pathname
             }

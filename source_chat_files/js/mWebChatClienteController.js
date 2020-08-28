@@ -11,8 +11,9 @@
 
     var WebChatClienteController = function (options) {
         this._options = {};
-	this._options.hashkey = options.hashkey || null;
+	    this._options.hashkey = options.hashkey || null;
         this._options.url = options.url;
+        this._options.wss = options.wss;
     };
 
     WebChatClienteController.prototype.isOnline = function () {
@@ -21,7 +22,7 @@
 
     WebChatClienteController.prototype._openWsConnection = function (onConnectionOpen) {
         var that = this;
-        var socket_options = {reconnect: RECONNECT_SETTINGS, network: true, use_clock_offset: true};
+        var socket_options = {reconnect: RECONNECT_SETTINGS, network: true, use_clock_offset: true, service_pathname: this._options.wss};
 
         var primus = new Primus(this._options.url + '/?userType=CLIENT&hashkey=' + this._options.hashkey, socket_options);
 
