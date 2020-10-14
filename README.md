@@ -30,7 +30,7 @@ The following parameters change by configuration:
     fs._hashkey = '07bde72f04518c47ac508d4c98fd791cfd9d1e1d';
     fs._server = '213.58.153.217:50002';
 
-The _domain parameter represents the account instance that you are connecting to
+The _domain parameter represents the account instance that you are connecting to (Domain UUID)
 
 The _hashkey parameter represents the specific Webchat Instance (or channel) that you want to use 
 
