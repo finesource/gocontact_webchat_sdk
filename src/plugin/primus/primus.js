@@ -2416,10 +2416,10 @@ function Primus(url, options) {
   // Custom transport options.
   options.transport = 'transport' in options ? options.transport : {};
 
-    options.service_pathname = 'service_pathname' in options ? options.service_pathname : null;
-    if (options.service_pathname) {
-        primus.pathname = options.service_pathname;
-    }
+  options.service_pathname = 'service_pathname' in options ? options.service_pathname : null;
+  if (options.service_pathname) {
+      primus.pathname = options.service_pathname;
+  }
 
   primus.buffer = [];                           // Stores premature send data.
   primus.writable = true;                       // Silly stream compatibility.

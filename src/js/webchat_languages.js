@@ -54,7 +54,9 @@ FSWebChatIn.lang.en = {
         change_name_ok: 'Change',
         change_name_cancel: 'Cancel',
         status_offline_title: 'Error',
-        status_offline_msg: 'Webchat is out of schedule.'
+        status_offline_msg: 'Webchat is out of schedule.',
+        on_hold_message: 'This plugin is being used on another tab.',
+        on_hold_btn: 'Get Access'
     },
     ractive: {
         joined: 'joined',
@@ -65,14 +67,16 @@ FSWebChatIn.lang.en = {
         comment: '[COMMENT]',
         rate_chat: 'Please, rate this chat.',
         rate_chat_btn: 'Rate Chat',
-        file_upload_client_ok: 'File Uploaded!',
-        file_upload_agent_ok: 'File Ready! Click to Download.',
+        file_upload_ok: 'File ready! Click to download.',
         file_upload_fail: 'File Transfer Failed!',
         file_upload_client_loading: 'Uploading File...',
         file_upload_agent_loading: 'Agent is Sending a File...',
         facebook_attach: 'New Facebook Attachment(s)',
         facebook_attach_type: 'Attachment Type',
-        facebook_attach_transfer: 'Open / Transfer'
+        facebook_attach_transfer: 'Open / Transfer',
+        whatsapp_new_attachment: "New Whatsapp Attachment",
+        whatsapp_attachment_type: "Attachment type",
+        whatsapp_attachment_open_transfer: "Open / transfer"
     },
     system: {
         mail_send_ok: 'Email successfully sent!',
@@ -130,7 +134,9 @@ FSWebChatIn.lang.pt = {
         change_name_ok: 'Alterar',
         change_name_cancel: 'Cancelar',
         status_offline_title: 'Erro',
-        status_offline_msg: 'O webchat encontra-se fora de horário.'
+        status_offline_msg: 'O webchat encontra-se fora de horário.',
+        on_hold_message: 'O plugin está a ser usado noutro separador.',
+        on_hold_btn: 'Obter Acesso'
     },
     ractive: {
         joined: 'entrou',
@@ -141,14 +147,16 @@ FSWebChatIn.lang.pt = {
         comment: '[COMENTÁRIO]',
         rate_chat: 'Por favor, avalie este chat.',
         rate_chat_btn: 'Avaliar Chat',
-        file_upload_client_ok: 'O ficheiro foi enviado!',
-        file_upload_agent_ok: 'O ficheiro está pronto! Clique para transferir.',
+        file_upload_ok: 'O ficheiro está pronto! Clique para transferir.',
         file_upload_fail: 'A transferência falhou!',
         file_upload_client_loading: 'A enviar ficheiro...',
         file_upload_agent_loading: 'O operador está a enviar um ficheiro...',
         facebook_attach: 'Novo(s) Anexo(s) via Facebook',
         facebook_attach_type: 'Tipo de Anexo',
-        facebook_attach_transfer: 'Ver / Transferir'
+        facebook_attach_transfer: 'Ver / Transferir',
+        whatsapp_new_attachment: "Novo Anexo via WhatsApp",
+        whatsapp_attachment_type: "Tipo de anexo",
+        whatsapp_attachment_open_transfer: "Ver / Transferir"
     },
     system: {
         mail_send_ok: 'Email enviado com sucesso!',
@@ -206,7 +214,9 @@ FSWebChatIn.lang.es = {
         change_name_ok: 'Cambio',
         change_name_cancel: 'Cancelar',
         status_offline_title: 'Error',
-        status_offline_msg: 'Webchat está fuera de horario.'
+        status_offline_msg: 'Webchat está fuera de horario.',
+        on_hold_message: 'This plugin is being used on another tab.',
+        on_hold_btn: 'Get Access'
     },
     ractive: {
         joined: 'unido',
@@ -217,11 +227,13 @@ FSWebChatIn.lang.es = {
         comment: '[COMMENT]',
         rate_chat: 'Por favor, califique este chat.',
         rate_chat_btn: 'Calificar Chat',
-        file_upload_client_ok: 'Archivo Subido!',
-        file_upload_agent_ok: 'Archivo Listo! Haga clic para descargar.',
+        file_upload_ok: 'File ready! Click to download.',
         file_upload_fail: '¡Error en la transferencia de archivos!',
         file_upload_client_loading: 'Subiendo Archivo...',
-        file_upload_agent_loading: 'El agente está enviando un archivo...'
+        file_upload_agent_loading: 'El agente está enviando un archivo...',
+        whatsapp_new_attachment: "New Whatsapp Attachment",
+        whatsapp_attachment_type: "Attachment type",
+        whatsapp_attachment_open_transfer: "Open / transfer"
     },
     system: {
         mail_send_ok: 'Correo electrónico enviado correctamente.',
@@ -279,7 +291,9 @@ FSWebChatIn.lang.fr = {
         change_name_ok:"Modifier",
         change_name_cancel:"Annuler",
         status_offline_title:"Erreur",
-        status_offline_msg:"Le webchat est en dehors des heures d'ouverture"
+        status_offline_msg:"Le webchat est en dehors des heures d'ouverture",
+        on_hold_message: 'This plugin is being used on another tab.',
+        on_hold_btn: 'Get Access'
     },
     ractive: {
         joined:"Rejoint",
@@ -290,14 +304,16 @@ FSWebChatIn.lang.fr = {
         comment:"[COMMENTAIRE]",
         rate_chat:"S'il vous plaît noter cette session de chat.",
         rate_chat_btn:"Évaluer session de conversation",
-        file_upload_client_ok:"Le fichier a été envoyé!",
-        file_upload_agent_ok:"Le fichier est prêt! Cliquez pour télécharger.",
+        file_upload_ok:"File ready! Click to download.",
         file_upload_fail:"Le téléchargement a échoué!",
         file_upload_client_loading:"Envoi de fichier …",
         file_upload_agent_loading:"L'opérateur est l'envoi un fichier …",
         facebook_attach:"Nouvelle (s) jointe (s) via Facebook",
         facebook_attach_type:"Type de fichier attaché",
-        facebook_attach_transfer:"Voir / Télécharger"
+        facebook_attach_transfer:"Voir / Télécharger",
+        whatsapp_new_attachment: "New Whatsapp Attachment",
+        whatsapp_attachment_type: "Attachment type",
+        whatsapp_attachment_open_transfer: "Open / transfer"
     },
     system: {
         mail_send_ok:"Email envoyé avec succès!",
@@ -355,7 +371,9 @@ FSWebChatIn.lang.de = {
         change_name_ok:"Veränderung",
         change_name_cancel:"stornieren",
         status_offline_title:"Fehler",
-        status_offline_msg:"Der Webchat ist außerhalb von Öffnungszeiten"
+        status_offline_msg:"Der Webchat ist außerhalb von Öffnungszeiten",
+        on_hold_message: 'This plugin is being used on another tab.',
+        on_hold_btn: 'Get Access'
     },
     ractive: {
         joined:"Beigetreten",
@@ -366,14 +384,16 @@ FSWebChatIn.lang.de = {
         comment:"[Kommentar]",
         rate_chat:"Bitte bewerte diese Chat-Sitzung.",
         rate_chat_btn:"Bewerten Sie Chat-Sitzung",
-        file_upload_client_ok:"Die Datei wurde hochgeladen!",
-        file_upload_agent_ok:"Die Datei ist fertig! Klicken Sie zum Download bereit.",
+        file_upload_ok:"File ready! Click to download.",
         file_upload_fail:"Download fehlgeschlagen!",
         file_upload_client_loading:"Datei wird hochgeladen…",
         file_upload_agent_loading:"Der Betreiber ist das Senden einer Datei …",
         facebook_attach:"Neue Anlage (n) über Facebook",
         facebook_attach_type:"Angehängter Dateityp",
-        facebook_attach_transfer:"Ansicht / Transfer"
+        facebook_attach_transfer:"Ansicht / Transfer",
+        whatsapp_new_attachment: "New Whatsapp Attachment",
+        whatsapp_attachment_type: "Attachment type",
+        whatsapp_attachment_open_transfer: "Open / transfer"
     },
     system: {
         mail_send_ok:"E-Mail erfolgreich gesendet!",

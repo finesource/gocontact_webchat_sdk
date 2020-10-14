@@ -30,7 +30,7 @@
 
         FSWebChat._file_server = parts.join(':');
 
-        iframe.setAttribute('src', FSWebChat._file_server + '/webchat_public/webchat.html');
+        iframe.setAttribute('src', FSWebChat._file_server + '/webchat_public/src/webchat.html');
         div.appendChild(iframe);
         document.body.appendChild(div);
     } else {
@@ -145,11 +145,12 @@
         FSWebChat.iframe.contentWindow.postMessage({
             "action": 'setOrigin',
             "params": {
+                "_domain": FSWebChat._domain,
                 "_hashkey": FSWebChat._hashkey,
-                "_subfolder": (FSWebChat._subfolder || ''),
+                "_subfolder": FSWebChat._subfolder || '',
                 "_server": FSWebChat._server,
-                "_wss": FSWebChat._wss,
-                "_service": FSWebChat._service,
+                "_endpoint_rest": FSWebChat._endpoint_rest,
+                "_endpoint_ws": FSWebChat._endpoint_ws,
                 "_timestamp": FSWebChat._timestamp,
                 "originPath": location.pathname
             }
@@ -238,19 +239,19 @@
         }, FSWebChat._file_server);
     };
     
-    FSWebChat.Mirroring.socketSend = function (msg) {
+    FSWebChat.Mirroring.send = function (msg) {
         FSWebChat.Mirroring.postMessage('send',JSON.stringify(msg));
     };
 
     FSWebChat.Mirroring.startMirroring = function () {
         FSWebChat.Mirroring.stopMirroring();
-        FSWebChat.Mirroring.socketSend({base: location.origin/*location.href.match(/^(.*\/)[^\/]*$/)[1]*/});
+        FSWebChat.Mirroring.send({base: location.origin/*location.href.match(/^(.*\/)[^\/]*$/)[1]*/});
         FSWebChat.Mirroring.mirrorClient = new TreeMirrorClient(document, {
             initialize: function (rootId, children) {
-                FSWebChat.Mirroring.socketSend({ f: 'initialize', args: [rootId, children] });
+                FSWebChat.Mirroring.send({ f: 'initialize', args: [rootId, children] });
             },
             applyChanged: function (removed, addedOrMoved, attributes, text) {
-                FSWebChat.Mirroring.socketSend({ f: 'applyChanged', args: [removed, addedOrMoved, attributes, text] });
+                FSWebChat.Mirroring.send({ f: 'applyChanged', args: [removed, addedOrMoved, attributes, text] });
             }
         });
     };
@@ -278,7 +279,6 @@
         if (document[FSWebChat.hidden]) {
             FSWebChat.Mirroring.stopMirroring();
         } else {
-            FSWebChat.iframe.contentWindow.postMessage({ "action":'setActiveData', "params": {} }, FSWebChat._file_server);
             var _statusvarofwcview = false;
             try{
                 _statusvarofwcview = localStorage.getItem("_statusvarofwcview") == 'true';

@@ -341,7 +341,6 @@ html, body{
 }
 
 #fs-webchat .main-dialog .chat-dialog-box .rating-box,
-#fs-webchat .main-dialog .chat-dialog-box .end-actions-box,
 #fs-webchat .main-dialog .chat-dialog-box .time-expire-box,
 #fs-webchat .main-dialog .chat-dialog-box .time-expire-autoclose-box,
 #fs-webchat .main-dialog .chat-dialog-box .change-name-box{
@@ -359,7 +358,6 @@ html, body{
 }
 
 #fs-webchat .main-dialog .chat-dialog-box .rating-box.active,
-#fs-webchat .main-dialog .chat-dialog-box .end-actions-box.active,
 #fs-webchat .main-dialog .chat-dialog-box .time-expire-box.active,
 #fs-webchat .main-dialog .chat-dialog-box .time-expire-autoclose-box.active,
 #fs-webchat .main-dialog .chat-dialog-box .change-name-box.active{
@@ -368,7 +366,6 @@ html, body{
 }
 
 #fs-webchat .main-dialog .chat-dialog-box .rating-box > div,
-#fs-webchat .main-dialog .chat-dialog-box .end-actions-box > div,
 #fs-webchat .main-dialog .chat-dialog-box .time-expire-box > div,
 #fs-webchat .main-dialog .chat-dialog-box .time-expire-autoclose-box > div,
 #fs-webchat .main-dialog .chat-dialog-box .change-name-box > div{
@@ -384,7 +381,6 @@ html, body{
 }
 
 #fs-webchat .main-dialog .chat-dialog-box .rating-box .btns button,
-#fs-webchat .main-dialog .chat-dialog-box .end-actions-box .btns button,
 #fs-webchat .main-dialog .chat-dialog-box .time-expire-box .btns button,
 #fs-webchat .main-dialog .chat-dialog-box .time-expire-autoclose-box .btns button,
 #fs-webchat .main-dialog .chat-dialog-box .change-name-box .btns button{
@@ -427,6 +423,11 @@ html, body{
 
 #fs-webchat .main-offline .btns{
     padding-top: 20px;
+}
+
+#fs-webchat .main-offline .messages{
+    margin-top: 20px;
+    text-align: center;
 }
 
 /*EPISODIOS*/
@@ -540,143 +541,23 @@ html, body{
     font-weight: bold;
 }
 
-/**************************************************************************/
-/* SmallBox Responsive */
-/**************************************************************************/
-
-#divbigBoxes #newTitlediv *{
-    font-weight: bold;
+#fs-webchat .main-on-hold{
+    display: none;
+    text-align: center;
+    margin-top: 100px;
+    font-size: 15px;
 }
 
-#divbigBoxes #newTitlediv .botClose{
-    cursor: pointer;
-    padding-right: 10px;
-    float: right;
+#fs-webchat .main-on-hold .btns{
+    margin-top: 15px;
 }
 
-#newContentdiv p >i:first-child{
-    padding-right: 10px;
+#fs-webchat.on-hold .main-on-hold{
+    height: 370px;
+    overflow: hidden;
+    display: block;
 }
 
-#divSmallBoxes{
-    position: fixed;
-    width: 90%;
-    right: 0;
-    top: 0;
-}
-
-.SmallBox{
-    width: 95%;
-}
-
-.SmallBox:hover{
-    box-shadow: 0px 0px 10px #888888;
-    cursor: pointer;
-}
-
-.SmallBox span{
-    font-size: 16px;
-}
-.SmallBox p{
-    font-size: 12px;
-    margin-top: 2px;
-}
-
-.SmallBox .textoFull{
-    width: 93%;
-    float: left;
-    padding-left: 20px;
-}
-
-.SmallBox .textoFoto{
-    width: 55%;
-    margin: 3px 20px 3px 80px;
-    float: left;
-}
-
-/* End of SmallBox Responsive*/
-
-/* bigBoxes Responsive */
-
-.bigBox{
-    position: fixed;
-    right: 10px;
-    bottom: 10px;
-    background-color: #004d60;
-    padding-left: 10px;
-    padding-top: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-    width: 88%;
-    height: 100px;
-    color: white;
-    z-index: 99999;
-}
-
-/* End of  bigBoxes  Responsive */
-
-/*Messagebox Responsive */
-
-.divMessageBox{
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 100000;
-}
-
-.MessageBoxContainer{
-    top: 25%;
-    color: white;
-    position: relative;
-    width: 100%;
-    background-color: #232323;
-}
-
-.MessageBoxMiddle{
-    position: relative;
-    left: 0;
-    width: 100%;
-    padding: 3px;
-}
-
-.MessageBoxMiddle .MsgTitle{
-    font-size: 22px;
-}
-
-.MessageBoxMiddle .pText{
-    font-size: 13px;
-}
-
-.MessageBoxContainer input{
-    width: 50%;
-    padding: 5px;
-}
-
-.MessageBoxContainer select{
-    width: 50%;
-    padding: 5px;
-}
-
-.MessageBoxButtonSection{
-    width: 100%;
-    height: 30px;
-}
-
-.MessageBoxButtonSection button{
-    float: right;
-    margin-right: 5px;
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
-/* End of Messagebox Responsive */
-
-
-footer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+#fs-webchat.on-hold .main-dialog{
+    display: none;
 }
