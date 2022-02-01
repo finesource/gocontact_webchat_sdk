@@ -11,9 +11,8 @@
         <script type="text/javascript" src="plugin/ractivejs/ractive.js"></script>
         <script type="text/javascript" src="plugin/lodash/lodash.js"></script>
         <script type="text/javascript" src="plugin/jquery/jquery.slimscroll.js"></script>
-        <script type="text/javascript" src="plugin/primus/primus.js"></script>
 
-        <script type="text/javascript" src="js/websocket-manager.js"></script>
+        <script type="text/javascript" src="js/connection-manager.js"></script>
         <script type="text/javascript" src="js/webchat.js"></script>
         <script type="text/javascript" src="js/storage.js"></script>
         <script type="text/javascript" src="js/chat.js"></script>
@@ -45,11 +44,12 @@
                 <div class="user-data-box active">
                     <div id="error-message-offline" class="well well-sm" data-translate="submit_message"></div>
 
-                    <div class="col-sm-12 form-horizontal" style="height: 60%; overflow-y: scroll;">
+                    <div class="col-sm-12 form-horizontal fields-ctn" style="height: 60%; overflow-y: scroll;">
                         <div class="form-group form-login-message" id="WCdivForInitMessage">
                             <div class="col-xs-12">
                                 <label for="on-message" class="col-xs-12 control-label" data-translate="message"></label>
-                                <textarea id="on-message" class="form-control" rows="2" data-translate-placeholder="message"></textarea>
+                                <textarea id="on-message" class="form-control" rows="2" data-internal-id="message"
+                                          data-translate-placeholder="message"></textarea>
                             </div>
                         </div>
                     </div>
@@ -97,7 +97,7 @@
                         </div>
 
                         <div class="comment-box">
-                            <textarea class="form-control" rows="2" data-translate-placeholder="write_comment"></textarea>    
+                            <textarea class="form-control" rows="2" data-translate-placeholder="write_comment"></textarea>
                         </div>
 
                         <div class="btns">
@@ -199,7 +199,7 @@
 
                 <div class="messages">
                     <span class="success hidden">
-                        <span data-translate="ticket_msg_success">Ticket successfully created. Ticket ID: </span> 
+                        <span data-translate="ticket_msg_success">Ticket successfully created. Ticket ID: </span>
                         <b></b>
                     </span>
 
@@ -281,7 +281,13 @@
                                 <br><br>
                                 <span>{{lang.whatsapp_attachment_type}}: {{parseAttachmentType(attachments[0].type)}}</span>
                                 <br>
-                                <a href="{{attachments[0].url}}" target="_blank">{{lang.whatsapp_attachment_open_transfer}}</a>
+                                {{#if usertype === 'CLIENT'}}
+                                    <a href="{{attachments[0].url}}" target="_blank">{{lang.whatsapp_attachment_open_transfer}}</a>
+                                {{/if}}
+
+                                {{#if usertype === 'AGENT'}}
+                                    <a href="{{storagePath + attachments[0].url}}" target="_blank">{{lang.whatsapp_attachment_open_transfer}}</a>
+                                {{/if}}
                             {{else}}
                                 {{#if containsFacebookAttachments(msg)}}
                                     <span>{{lang.facebook_attach}}</span>
@@ -451,7 +457,7 @@
                         <div>
                             {{#if file.filestatus === true && preventAttachDownload !== true}}
                                 <span class="text-success">
-                                    <a class="download" href="{{file.url}}" download="{{file.filename}}"><span>{{lang.file_upload_ok}}</span></a>
+                                    <a class="download" href="{{storagePath + file.url}}" download="{{file.filename}}"><span>{{lang.file_upload_ok}}</span></a>
                                 </span>
                             {{/if}}
 
@@ -461,13 +467,13 @@
 
                             {{#if file.filestatus === null}}
                                 <span>{{usertype === 'CLIENT' ? lang.file_upload_client_loading : lang.file_upload_agent_loading}} <i class="fa fa-spinner fa-spin"></i></span>
-                            {{/if}} 
+                            {{/if}}
                         </div>
                     </div>
                 {{/if}}
 
                 </li>
             {{/each}}
-        </script>    
+        </script>
     </body>
 </html>

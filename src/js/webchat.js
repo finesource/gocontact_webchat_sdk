@@ -16,9 +16,21 @@ FSWebChatIn.sound = new Audio('sounds/chat_sound.mp3');
 FSWebChatIn.secondsToUpdateDates = 60;
 FSWebChatIn.dialog_indexs = {};
 FSWebChatIn.loginFields = [];
+FSWebChatIn.setExtraFields = {};
+FSWebChatIn.usingExtForm = false;
+FSWebChatIn.isactive = false;
 
 FSWebChatIn.rest_endpoint = null;
 FSWebChatIn.accessKey = null;
+FSWebChatIn.startDate = new Date().toISOString();
+
+window.addEventListener('storage', async function (e) {
+    if (e.key.includes('last_state')) {
+        await connectionManager.close(true);
+
+        $('#fs-webchat').addClass('on-hold');
+    }
+});
 
 /**
  * This method shows an error message (on the top of the webchat window) when the client tries to start a conversation
@@ -40,6 +52,28 @@ FSWebChatIn.inIframe = function () {
     } catch (e) {
         return true;
     }
+};
+
+FSWebChatIn.setActive = function (isActive) {
+    var element = document.getElementById('fs-webchat');
+    if (isActive && element) {
+        element.classList.add("isactive");
+    }
+    if (!isActive && element) {
+        element.classList.remove("isactive");
+    }
+    FSWebChatIn.isactive = isActive;
+};
+
+FSWebChatIn.setUsingExtForm = function (isExtForm) {
+    var element = document.getElementById('fs-webchat');
+    if (isExtForm && element) {
+        element.classList.add("isextform");
+    }
+    if (!isExtForm && element) {
+        element.classList.remove("isextform");
+    }
+    FSWebChatIn.usingExtForm = isExtForm;
 };
 
 FSWebChatIn.extendObject = function (obj, props) {
@@ -69,12 +103,12 @@ FSWebChatIn.storeBrowserPath = function (obj) {
             array_path[array_path_length - 1].readingtime = obj.readingtime;
         }
         array_path.push(obj);
-        FSWebChatIn.storage.add('path', JSON.stringify(array_path));  
+        FSWebChatIn.storage.add('path', JSON.stringify(array_path));
     }
     if(FSWebChatIn.chatUuid!==null){
          FSWebChatIn.sendBrowserVisitorPath();
     }
-    
+
     return true;
 };
 
@@ -137,6 +171,23 @@ FSWebChatIn.ShowHideElement = function (_id,_display){
     parent.postMessage(_msg,FSWebChatIn._options.origin);
 };
 
+FSWebChatIn.ShowHidePageContainer = function (_display){
+    var display = _display === 'show' ? '' : 'none';
+    var _msg = {action:"ShowHidePageContainer", display: display};
+    parent.postMessage(_msg,FSWebChatIn._options.origin);
+};
+
+FSWebChatIn.ShowHideExtFormContainer = function (_display){
+    var display = _display === 'show' ? '' : 'none';
+    var _msg = {action:"ShowHideExtFormContainer", display: display};
+    parent.postMessage(_msg,FSWebChatIn._options.origin);
+};
+
+FSWebChatIn.ValidateUsingExtForm = function (){
+    var _msg = {action:"ValidateUsingExtForm"};
+    parent.postMessage(_msg,FSWebChatIn._options.origin);
+};
+
 FSWebChatIn.Mirroring = function (action, data) {
     if (action !== 'send') {
         return;
@@ -175,7 +226,12 @@ function FSWebChatInhandleResponse(e) {
             FSWebChatIn.extendObject(FSWebChatIn._options, e.data.params)
         }
 
-        FSWebChatIn.rest_endpoint = FSWebChatIn._options._server + '/' + FSWebChatIn._options._endpoint_rest;
+        // compatibility mode
+        if (FSWebChatIn._options._endpoint_rest[0] !== '/') {
+            FSWebChatIn._options._endpoint_rest = '/' + FSWebChatIn._options._endpoint_rest;
+        }
+
+        FSWebChatIn.rest_endpoint = FSWebChatIn._options._server + FSWebChatIn._options._endpoint_rest;
 
         FSWebChatIn.storage = new Storage();
         FSWebChatIn.isWebchatDialogInit();
@@ -197,6 +253,12 @@ function FSWebChatInhandleResponse(e) {
         $('#fs-webchat').hasClass('opened') && $('#fs-webchat header').click();
     } else if (e.data.action === 'Control:StopChat') {
         FSWebChatIn.Chat.clientUnRegister('UNREGISTER-TRIGGERED-BY-OWNER');
+    } else if (e.data.action === 'Control:StartConversation') {
+        FSWebChatIn.Chat.startConversationWithFields(e.data.fieldMap);
+    } else if (e.data.action === 'Control:SetExtraFields') {
+        FSWebChatIn.setExtraFields = e.data.extraFields || {};
+    }else if (e.data.action === 'Inform:UsingExtForm') {
+        FSWebChatIn.setUsingExtForm(true);
     }
 }
 
@@ -205,10 +267,10 @@ function FSWebChatInhandleResponse(e) {
         /*window.onload = FSWebChatIn.iframeAjust;*/
     }
     function FSWebChatremoveEventHandler(elem,eventType,handler) {
-        if (elem.removeEventListener) 
+        if (elem.removeEventListener)
            elem.removeEventListener (eventType,handler,false);
         if (elem.detachEvent)
-           elem.detachEvent ('on'+eventType,handler); 
+           elem.detachEvent ('on'+eventType,handler);
     }
     function FSWebChataddEvent(elem, event, fn) {
         if (elem.addEventListener) {
@@ -216,11 +278,11 @@ function FSWebChatInhandleResponse(e) {
         } else {
             elem.attachEvent("on" + event, function() {
                 // set the this pointer same as addEventListener when fn is called
-                return(fn.call(elem, window.event));   
+                return(fn.call(elem, window.event));
             });
         }
     }
-    
+
     FSWebChatIn.event = ['message'];
     FSWebChatIn.event.forEach(function (elem, index, array) {
         if(elem==='message'){
@@ -228,19 +290,19 @@ function FSWebChatInhandleResponse(e) {
             FSWebChataddEvent(window, elem, FSWebChatInhandleResponse )
         }
     });
-    
-}(FSWebChatIn));    
+
+}(FSWebChatIn));
 /**IFRAME COMUNICATION FINIT**/
 
 /**
  * Get webchat configs and start rendering the plugin.
- * 
+ *
  * @returns {unresolved}
  */
 FSWebChatIn.init = function () {
     FSWebChatIn.listenSocketEvents();
 
-    return $.getJSON(FSWebChatIn.rest_endpoint + '/webchats/configs/' + 
+    return $.getJSON(FSWebChatIn.rest_endpoint + '/webchats/configs/' +
             FSWebChatIn._options._hashkey + '?domain=' + FSWebChatIn._options._domain).done(function (data) {
         for (var _set in data.data) {
             if (data.data[_set] === 'true' || data.data[_set] === 'false') {
@@ -249,21 +311,22 @@ FSWebChatIn.init = function () {
         }
 
         FSWebChatIn.domain = data.data.domain;
+        FSWebChatIn.storagePath = data.data.storagePath;
         FSWebChatIn.geolocation = data.data.allowGeolocation;
-
-        if (!FSWebChatIn._options._domain) {
-            FSWebChatIn._options._domain = FSWebChatIn.domain;
-        }
+        FSWebChatIn.endpointConnectionManager = data.data.endpointConnectionManager;
 
         FSWebChatIn.validation = data.validation || null;
 
         if(FSWebChatIn.storage.get('uuid') === null && FSWebChatIn.validation !== FSWebChatIn.storage.get('validation')){
-            FSWebChatIn.storage.clear();
+            FSWebChatIn.storage.remove('validation','webchat_init', 'accessKey', 'dialog', 'uuid', 'chat_id', 'lastpathtime', 'lasturl', 'path', 'isMirroring');
             FSWebChatIn.storage.add('validation', FSWebChatIn.validation);
         }
 
         FSWebChatIn.loginFields = data.data.loginFields;
-        FSWebChatIn.renderLoginScreen(FSWebChatIn.loginFields);
+
+        if (Array.isArray(FSWebChatIn.loginFields) && FSWebChatIn.loginFields.length > 0) {
+            FSWebChatIn.renderLoginScreen(FSWebChatIn.loginFields);
+        }
 
         FSWebChatIn._timestamp = +new Date();
         FSWebChatIn.Chat = new Chat(null, data.data);
@@ -271,33 +334,38 @@ FSWebChatIn.init = function () {
     });
 };
 
-FSWebChatIn.renderLoginScreen = function(loginFields) {
+/**
+ * Renders the fields required for user login.
+ *
+ * @param {Array} loginFields
+ * @returns {undefined}
+ */
+FSWebChatIn.renderLoginScreen = function (loginFields) {
+    const loginScreenContainerElement = $('.form-login-message');
 
-    var loginScreenContainerElement = $('.form-login-message');
-    var loginFieldElement           = function (field, label, required, searchable) {
-        return  '<div class="form-group loginfields-group">'+
-                    '<div class="col-xs-12">'+
-                        '<label for="'+field+'"  class="col-xs-12" placeholder="'+label+'">'+label+'</label>'+
-                        '<input data-contact-search="'+searchable+'" placeholder="'+label+'" type="text" id="'+field+'" class="form-control _loginfield-required-'+required+'">'+
-                    '</div>'+
-                '</div>';
-    };
-    if (loginFields && loginFields.length > 0) {
-        loginFields.forEach(function (field) {
-            var newField = loginFieldElement(field.field, field.label, field.require, field.searchable);
-            loginScreenContainerElement.before(newField);
-        });
-    }
+    loginFields.forEach(function (fieldData) {
+        const {field, label, extrafieldlabel, require, searchable} = fieldData;
+
+        loginScreenContainerElement.before(`
+            <div class="form-group loginfields-group">
+                <div class="col-xs-12">
+                    <label for="${field}" class="col-xs-12" placeholder="${label}">${label}</label>
+                    <input data-contact-search="${searchable}" placeholder="${label}" type="text" id="${field}"
+                        data-internal-id="${extrafieldlabel}" class="form-control _loginfield-required-${require}">
+                </div>
+            </div>
+        `);
+    });
 };
 
 /**
  * Inits webchat socket.
- * 
+ *
  * @returns {boolean}
  */
 FSWebChatIn.initSocket = function () {
     let baseUrl = FSWebChatIn._options._server;
-    let serviceName = FSWebChatIn._options._endpoint_ws;
+    let serviceName = FSWebChatIn.endpointConnectionManager;
 
     const parsedUrl = new URL(baseUrl);
 
@@ -309,10 +377,10 @@ FSWebChatIn.initSocket = function () {
         serviceName = serviceName.substring(1);
     }
 
-    websocketManager.start({
+    connectionManager.start({
         baseurl: parsedUrl.origin,
         serviceName: serviceName
-    }, 30);
+    }, 'SSE', 30);
 
     return new Promise(function (resolve, reject) {
         $(document).one('websocket-status', function (evt, data) {
@@ -328,30 +396,32 @@ FSWebChatIn.initSocket = function () {
 };
 
 FSWebChatIn.listenSocketEvents = function () {
-    websocketManager.on('all', 'webchat-plugin', FSWebChatIn.handleSocketEvent);
+    connectionManager.on('all', 'webchat_plugin', FSWebChatIn.handleSocketEvent);
 
-    websocketManager.on('internal', 'internal', function (message) {
-        if (message.connectionOpen && message.isFirstSocket === true) {
+    connectionManager.on('internal', 'internal', function (message) {
+        if (message.managerStarted === true) {
             return $(document).trigger('websocket-status', [{online: true}]);
         }
 
-        if (message.connectionClosed && message.isLastSocket) {
-            return $(document).trigger('websocket-status', [{online: false}]);
-        }
+        if (message.managerStarted === false) {
+            if (message.errorCode && message.errorCode === connectionManager.ERRORS.DUPLICATED_SESSION) {
+                $('#fs-webchat').addClass('on-hold');
+                return;
+            }
 
-        if (message.error && message.error === 'NO_SERVERS_AVAILABLE') {
             return $(document).trigger('websocket-status', [{error: true}]);
-        }
-
-        if (message.connectionUpdate && message.killedByReRegister === true) {
-            $('#fs-webchat').addClass('on-hold');
         }
     });
 };
 
-FSWebChatIn.handleSocketEvent = function(request){
+FSWebChatIn.handleSocketEvent = function (request, fullPayload) {
     switch (request.action) {
         case 'FSwebchat:Server:SendMsg':
+            // if message was produced before this browser load, new-client-messages request should fetch it
+            if (new Date(FSWebChatIn.startDate) > new Date(fullPayload.payloadBuildDate)) {
+                return;
+            }
+
             FSWebChatIn.serverWebChatMsg(request);
             break;
         case 'FSwebchat:Server:UpdateMsg':
@@ -404,14 +474,14 @@ FSWebChatIn.serverUpdateWebChatMsg = function(request){
  * Reset the interface.
  */
 FSWebChatIn.resetInterface = function () {
-    websocketManager.close();
+    connectionManager.close();
 
     FSWebChatIn.Chat.clientUnRegister();
 };
 
 /**
  * Mark client dialog as read.
- * 
+ *
  * @param {string} dialogUuid
  * @returns {jqXHR}
  */

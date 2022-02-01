@@ -9,6 +9,7 @@ var Dialog = function (name, email) {
         template: '#templates',
         data: {
             lang: FSWebChatIn.Chat.getLangObj().ractive,
+            storagePath: FSWebChatIn.storagePath,
             episodes: this.episodes,
             formatSize: this.formatSize,
             formatTimeEllapsed: this.formatTimeEllapsed,

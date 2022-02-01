@@ -20,7 +20,7 @@ Chat.POSITION = Object.freeze({
     "TOP-LEFT": { "vertical": "top", "horizontal": "left"}
 });
 
-Chat.prototype.Render = function (isChatOnline) {  
+Chat.prototype.Render = function (isChatOnline) {
     this.applyConfigs(isChatOnline);
     this.applyEvents(isChatOnline);
     this.checkChatState(isChatOnline);
@@ -40,7 +40,7 @@ Chat.prototype.isOnline = function () {
 
 /**
  * Update the interface when the server status changes.
- * 
+ *
  * @param {boolean} is_online
  * @returns {undefined}
  */
@@ -67,10 +67,12 @@ Chat.prototype.applyConfigs = function (isChatOnline) {
     $("head").append('<link rel="stylesheet" href="css/webchat-' + (this.configs.theme_name || 'theme-blue') + '.css">');
 
     if (this.configs.webchat_custom_theme && this.configs.webchat_custom_theme.active === "true") {
-            $("head").append('<link rel="stylesheet" href="' + (this.configs.webchat_custom_theme.file.filePath) + '">');
+        const userCssUrl = FSWebChatIn.storagePath + this.configs.webchat_custom_theme.file.filePath;
+
+        $("head").append('<link rel="stylesheet" href="' + userCssUrl + '">');
     }
 
-    var _styles = {"position": 'fixed', "bottom": '-410px', "zIndex": '9999999999', "display": 'block', "height": '450px', "transition": 'all linear 0.20s'};
+    var _styles = {"position": 'fixed', "bottom": '-410px', "zIndex": '2147483646', "display": 'block', "height": '450px', "transition": 'all linear 0.20s'};
 
     _styles[position] = '20px';
     _styles['width'] = Chat.SIZE[this.configs.size];
@@ -111,6 +113,11 @@ Chat.prototype.applyEvents = function (isChatOnline) {
     var $webchat = $("#fs-webchat");
     $webchat.find('header').on('click', function (e) {
         e.stopPropagation();
+        if(FSWebChatIn.usingExtForm === true && FSWebChatIn.isactive === false && $webchat.hasClass('closed')){
+            console.warn('Using External Form');
+            FSWebChatIn.ShowHideExtFormContainer('show');
+            return;
+        }
         if ($webchat.hasClass('closed')) {
             $webchat.toggleClass('closed opened');
             $webchat.find('.new-messages').html('');
@@ -119,7 +126,7 @@ Chat.prototype.applyEvents = function (isChatOnline) {
             $webchat.find('header span[data-when="online"] span').last().hide();
             FSWebChatIn.storage.add('state', 'open');
         }else if ($webchat.hasClass('opened')){
-            $('#fs-webchat').toggleClass('closed opened');
+            $webchat.toggleClass('closed opened');
             /*this.elements.main_container.css({bottom: '-410px'});*/
             FSWebChatIn.ChangeStyleOfParent('fs_webchat_container', { "bottom": '-410px'});
 
@@ -138,7 +145,7 @@ Chat.prototype.applyEvents = function (isChatOnline) {
     });
 
     $('#btn-start-dialog, #btn-submit-message').on('click', this.onUserDataSubmit.bind(this));
-    $('#resume-from-hold').on('click', this.onResumeHold);
+    $('#resume-from-hold').one('click', this.onResumeHold);
     $('.chat-dialog-box .list-options-box .op:not(.no-select)').on('click', this.onOptionClick.bind(this));
     $('#file-upload').on('change', this.onFileUpload.bind(this));
     $('.chat-dialog-box .rating-box .stars-box span').on('click', this.onStarClick);
@@ -164,15 +171,15 @@ Chat.prototype.applyEvents = function (isChatOnline) {
         $('.chat-dialog-box .list-options-box').removeClass('active');
         $('.chat-dialog-box').removeClass('list-options-box-active');
     });
-    
+
     $('.chat-dialog-box .list-options-box li[data-action="private-mode"] input').on('change', function () {
         $(this).is(":checked") ? FSWebChatIn.storage.setStorage('session') : FSWebChatIn.storage.setStorage('local');
     });
-    
+
     $('.chat-dialog-box .list-options-box li[data-action="sound-alert"] input').on('change', function () {
         FSWebChatIn.storage.add('sound', $(this).is(":checked"));
     });
-    
+
     if(this.configs['start_chat_withoutmsg']!==undefined && this.configs['start_chat_withoutmsg']){
         $('div#WCdivForInitMessage').hide();
     }
@@ -180,7 +187,7 @@ Chat.prototype.applyEvents = function (isChatOnline) {
 
 /**
  * Checks is there is an active chat to recover.
- * 
+ *
  * @param {boolean} isChatOnline
  * @returns {Promise}
  */
@@ -204,6 +211,7 @@ Chat.prototype.checkChatState = function (isChatOnline) {
     }
 
     FSWebChatIn.loading = true;
+    FSWebChatIn.setActive(true);
 
     return this.resumeSession().then(function () {
         return FSWebChatIn.initSocket();
@@ -213,6 +221,7 @@ Chat.prototype.checkChatState = function (isChatOnline) {
         FSWebChatIn.sendUnsendMsg();
         FSWebChatIn.sendBrowserVisitorPath();
     }).then(function () {
+        FSWebChatIn.ShowHidePageContainer('show');
         FSWebChatIn.loading = false;
     }).catch(function (err) {
         FSWebChatIn.resetInterface();
@@ -239,7 +248,7 @@ Chat.prototype.resumeSession = function () {
 
 /**
  * Reloads the component.
- * 
+ *
  * @param {object} chat_dialog
  * @returns {undefined}
  */
@@ -304,11 +313,13 @@ Chat.prototype.onUserDataSubmit = function (e) {
     }
 
     if ($('#' + id).parent().parent().find('.has-error').length > 0) {
+        this.openWindowIfClosed();
+
         return $(e.target).removeClass('disabled');
     }
 
     if (id === 'btn-start-dialog') {
-        return that.acquireAccessKey(FSWebChatIn._options._domain, FSWebChatIn._options._hashkey).then(function (result) {
+        return that.acquireAccessKey(FSWebChatIn.domain, FSWebChatIn._options._hashkey).then(function (result) {
             FSWebChatIn.accessKey = result.accessKey;
 
             return FSWebChatIn.initSocket();
@@ -317,7 +328,12 @@ Chat.prototype.onUserDataSubmit = function (e) {
                 obj = that.buidContactObjFromLoginFields(obj);
             }
 
+            if (Object.keys(FSWebChatIn.setExtraFields).length > 0 ) {
+                obj.setExtraFields = FSWebChatIn.setExtraFields;
+            }
+
             that.initDialog(obj).then(function () {
+                FSWebChatIn.setExtraFields = {};
                 $(e.target).removeClass('disabled');
             });
         });
@@ -385,7 +401,7 @@ Chat.prototype.submitOfflineMessage = function (data) {
     var that = this;
     var body = {
         hashkey: FSWebChatIn._options._hashkey,
-        domainUuid: FSWebChatIn._options._domain,
+        domainUuid: FSWebChatIn.domain,
         contact_email: data.email,
         contact_name: data.name,
         message: data.message
@@ -414,13 +430,13 @@ Chat.prototype.setChatID = function () {
 
 Chat.prototype.initDialog = function (data) {
     var that = this;
-
     return $.ajax({
         type: 'POST',
         url: FSWebChatIn.rest_endpoint + '/plugin/' + FSWebChatIn.accessKey + '/new-dialog-group',
         data: {
             originPath: FSWebChatIn._options.originPath,
-            loginFields: data.loginFields
+            loginFields: data.loginFields,
+            setExtraFields: data.setExtraFields || {}
         }
     }).then(function (result) {
         FSWebChatIn.chatUuid = result.dialogGroupUuid;
@@ -434,6 +450,8 @@ Chat.prototype.initDialog = function (data) {
         FSWebChatIn.storage.add('webchat_init', FSWebChatIn._options._hashkey);
         FSWebChatIn.storage.add('accessKey', FSWebChatIn.accessKey);
         FSWebChatIn.sendWebChatDialogStatus(FSWebChatIn.chatUuid);
+        FSWebChatIn.setActive(true);
+        FSWebChatIn.ShowHidePageContainer('show');
 
         that.setChatID();
         that.startDialog(data);
@@ -449,7 +467,7 @@ Chat.prototype.initDialog = function (data) {
 
 /**
  * When the server confirms the client JOIN, we send the first message.
- * 
+ *
  * @param {object} evt
  * @param {object} data
  * @returns {undefined}
@@ -463,6 +481,8 @@ Chat.prototype.onJoinResponse = function (evt, data) {
 };
 
 Chat.prototype.startDialog = function (data) {
+    this.openWindowIfClosed();
+
     $('.main-dialog > div').toggleClass('active');
 
     if (data.message) {
@@ -476,7 +496,7 @@ Chat.prototype.startDialog = function (data) {
 
 /**
  * Requests an email to client with the conversation.
- * 
+ *
  * @returns {jqXHR}
  */
 Chat.prototype.sendEmail = function () {
@@ -552,7 +572,7 @@ Chat.prototype.onFileUpload = function (e) {
     FSWebChatIn.fileUpLoad = null;
     FSWebChatIn.Chat.dialog.newFile(obj);
     $(e.target).val('');
-    
+
     var size_limit = this.configs.allow_send_files_options.size_limit, size_limit_mb = (size_limit / 1024 / 1024).toFixed(1);
     var allowed_extensions = this.configs.allow_send_files_options.allowed_extensions;
 
@@ -579,7 +599,7 @@ Chat.prototype.onFileUpload = function (e) {
 
 /**
  * Uploads the current selected file.
- * 
+ *
  * @param {object} episode
  * @returns {xhr}
  */
@@ -695,7 +715,7 @@ Chat.prototype.onDialogChange = function (evt, data) {
 
             if (data.episode.usertype === 'AGENT') {
                 this.isSoundEnabled() && FSWebChatIn.sound.play();
-                
+
                 if ($('#fs-webchat').hasClass('closed')) {
                     var new_msg = $('#fs-webchat .new-messages').html() || 0;
                     $('#fs-webchat .new-messages').html(++new_msg);
@@ -705,7 +725,7 @@ Chat.prototype.onDialogChange = function (evt, data) {
     }
 };
 
-Chat.prototype.clientUnRegister = function (type) {
+Chat.prototype.clientUnRegister = async function (type) {
     if ($('.chat-dialog-box').hasClass('active')) {
         $('.main-dialog > div').toggleClass('active');
     }
@@ -719,26 +739,32 @@ Chat.prototype.clientUnRegister = function (type) {
     }
 
     if (type && type !== 'SetStatusVarWCInactivity') {
-        $.ajax({
-            type: 'POST',
-            url: FSWebChatIn.rest_endpoint + '/plugin/' + FSWebChatIn.accessKey + '/client-unregister',
-            data: {
-                closeType: type
-            }
-        }).then(function () {
-            websocketManager.close();
-        });
+        try {
+            await connectionManager.close();
+        } catch (ignoreError) {
+        } finally {
+            $.ajax({
+                type: 'POST',
+                url: FSWebChatIn.rest_endpoint + '/plugin/' + FSWebChatIn.accessKey + '/client-unregister',
+                data: {
+                    closeType: type
+                }
+            });
+        }
 
         FSWebChatIn.SetStatusVarWCInactivity();
     }
 
     FSWebChatIn.storage.remove('validation','webchat_init', 'accessKey', 'dialog', 'uuid', 'chat_id', 'lastpathtime', 'lasturl', 'path', 'isMirroring');
+
     FSWebChatIn.sendWebChatDialogStatus('');
+    FSWebChatIn.setActive(false);
+    FSWebChatIn.ShowHidePageContainer('hide');
     $('.loginfields-group input, #on-message, #off-name, #off-email, #off-message').val('');
 
     FSWebChatIn.ResetStatusVarWCView();
 
-    
+
     FSWebChatIn.chatUuid = null;
     FSWebChatIn.UnsendMsg = {};
     FSWebChatIn._timestamp = +new Date();
@@ -813,7 +839,7 @@ Chat.prototype.getLangObj = function () {
 
 /**
  * Notify the server about language change.
- * 
+ *
  * @param {string} newLanguage
  * @returns {jqXHR}
  */
@@ -853,6 +879,56 @@ Chat.prototype.acquireAccessKey = function (domainUuid, hashKey) {
     });
 };
 
+/**
+ * Checks if the Webchat window is closed.
+ * If it is, we simulate a click in order to open it.
+ *
+ * @returns {undefined}
+ */
+Chat.prototype.openWindowIfClosed = function () {
+    const mainCtn = document.getElementById('fs-webchat');
+
+    if (mainCtn.classList.contains('closed')) {
+        mainCtn.querySelectorAll('header')[0].click();
+    }
+};
+
+/**
+ * If there is no active conversation and the Webchat is online,
+ *  render the provided fields on the form (only if the keys match),
+ *  and immediately start the conversation.
+ *
+ * @param {Object} fieldMapping
+ * @returns {undefined}
+ */
+Chat.prototype.startConversationWithFields = function (fieldMapping) {
+    if (FSWebChatIn.chatUuid !== null) {
+        console.error('A conversation is already active.');
+        return;
+    }
+
+    if (FSWebChatIn.Chat.online === false) {
+        console.error('Webchat is offline.');
+        return;
+    }
+
+    const fieldsCtn = document.querySelectorAll('.fields-ctn');
+
+    for (const fieldKey in fieldMapping) {
+        const targetEl = fieldsCtn[0].querySelectorAll(`*[data-internal-id="${fieldKey}"]`);
+
+        if (targetEl.length === 1) {
+            targetEl[0].value = fieldMapping[fieldKey];
+        }
+    }
+
+    document.getElementById('btn-start-dialog').click();
+};
+
 Chat.prototype.onResumeHold = function () {
-    window.location.reload();
+    FSWebChatIn.storage.add('last_state', Date.now());
+
+    setTimeout(function () {
+        window.location.reload();
+    }, 2000);
 };
