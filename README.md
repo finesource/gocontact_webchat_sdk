@@ -1,34 +1,36 @@
 # GoContact Client Webchat Interface SDK
 
-This repository is the base SDK for the Webchat Client in GoContact
+This repository is the base SDK for the Webchat Client in GoContact.
+It is compatible with 2021.1 and 2021.1 GoContact CCaaS releases. 
 
-The base configuration for the startup of the module is:
+The base configuration for the startup of the module is (this is just an example):
 
 ```javascript
+<script id="script_of_FSWebChat" type="text/javascript">
     window.FSWebChat || (function(d, s) {
         var fs = FSWebChat = function() {};
         fs._s = d.createElement(s);
         fs._h = d.getElementsByTagName(s)[0];
         fs._domain = 'f3274b18-6a93-43e4-9829-95318717a4a0';
-        fs._hashkey = '07bde72f04518c47ac508d4c98fd791cfd9d1e1d';
+        fs._hashkey = '033d341c4b3eae401cf55e0f9cdda7d8809b776b';
         fs._subfolder = '';
-        fs._server = '213.58.153.217:50002';
-        fs._endpoint_rest = 'new-webchat-service';
-        fs._endpoint_ws = 'ws-service-webchat';
+        fs._server = 'https://<hostname>:443/poll';
+        fs._service = '/new-webchat-service';
         fs._timestamp = +new Date;
         fs._s.setAttribute("charset", "utf-8");
-        fs._s.src = fs._server + '/' + fs._endpoint_rest + '/startup/' + fs._domain + '/' + fs._hashkey;
+        fs._s.src = fs._server + fs._service + "/startup/" + fs._domain + "/" + fs._hashkey;
         fs._s.type = 'text/javascript';
         fs._s.async = true;
         fs._h.parentNode.insertBefore(fs._s, fs._h);
     })(document, "script");
+</script>
 ```
 
-The following parameters change by configuration:
+The following parameters are changed by configuration:
 
-    fs._domain = 'f3274b18-6a93-43e4-9829-95318717a4a0';
-    fs._hashkey = '07bde72f04518c47ac508d4c98fd791cfd9d1e1d';
-    fs._server = '213.58.153.217:50002';
+        fs._domain = 'f3274b18-6a93-43e4-9829-95318717a4a0';
+        fs._hashkey = '033d341c4b3eae401cf55e0f9cdda7d8809b776b';
+        fs._server = 'https://<hostname>:443/poll';
 
 The _domain parameter represents the account instance that you are connecting to (Domain UUID)
 
