@@ -1,7 +1,7 @@
 # GoContact Client Webchat Interface SDK
 
 This repository is the base SDK for the Webchat Client in GoContact.
-It is compatible with 2021.1 and 2021.1 GoContact CCaaS releases. 
+It is compatible with 2021.2+ GoContact CCaaS releases. 
 
 The base configuration for the startup of the module is (this is just an example):
 
